@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>作业邮件提交系统</title>
+  <title>网页邮件发送系统</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <main class="page">
     <section class="card">
       <div class="card-header">
-        <p class="badge">Assignment Mail Demo</p>
-        <h1>作业邮件提交系统</h1>
-        <p class="subtitle">通过网页表单向老师提交作业邮件，适合 Ubuntu 22.04 + Nginx + Flask 的公网部署场景。</p>
+        <p class="badge">Mail Form Demo</p>
+        <h1>网页邮件发送系统</h1>
+        <p class="subtitle">通过网页表单填写发件人、收件人、主题与正文，由 Ubuntu 服务器通过 Nginx + Flask + SMTP 发出邮件。</p>
       </div>
 
       <div class="target-box">
-        <span class="target-label">提交目标</span>
-        <strong>{{ teacher_email }}</strong>
-        <p>老师邮箱由服务器端固定配置，公网环境下不会让访问者自行指定收件人。</p>
+        <span class="target-label">使用说明</span>
+        <strong>收件人邮箱由提交者自行填写</strong>
+        <p>如果你要把这个站点暴露到公网，强烈建议额外增加登录、验证码或收件人白名单，避免被滥用为任意发信入口。</p>
       </div>
 
       <form id="mail-form" class="mail-form" novalidate>
@@ -29,17 +29,22 @@
 
         <div class="form-row">
           <label for="email">发件人邮箱</label>
-          <input id="email" name="email" type="email" placeholder="student@example.com" required>
+          <input id="email" name="email" type="email" placeholder="sender@example.com" required>
+        </div>
+
+        <div class="form-row">
+          <label for="to_email">收件人邮箱</label>
+          <input id="to_email" name="to_email" type="email" placeholder="receiver@example.com" required>
         </div>
 
         <div class="form-row">
           <label for="subject">邮件主题</label>
-          <input id="subject" name="subject" type="text" maxlength="200" placeholder="课程作业提交 - 第 1 次实验" required>
+          <input id="subject" name="subject" type="text" maxlength="200" placeholder="请输入邮件主题" required>
         </div>
 
         <div class="form-row">
           <label for="message">邮件正文</label>
-          <textarea id="message" name="message" rows="8" maxlength="5000" placeholder="请输入作业说明、附件说明或备注信息。" required></textarea>
+          <textarea id="message" name="message" rows="8" maxlength="5000" placeholder="请输入邮件正文内容。" required></textarea>
         </div>
 
         <button id="submit-btn" type="submit">提交并发送邮件</button>

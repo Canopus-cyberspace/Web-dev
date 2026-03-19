@@ -16,6 +16,9 @@ function validateForm(data) {
   if (!data.email || !EMAIL_RE.test(data.email)) {
     return "请输入正确的发件人邮箱。";
   }
+  if (!data.to_email || !EMAIL_RE.test(data.to_email)) {
+    return "请输入正确的收件人邮箱。";
+  }
   if (!data.subject) {
     return "请输入邮件主题。";
   }
@@ -32,6 +35,7 @@ form.addEventListener("submit", async (event) => {
   const data = {
     name: (formData.get("name") || "").trim(),
     email: (formData.get("email") || "").trim(),
+    to_email: (formData.get("to_email") || "").trim(),
     subject: (formData.get("subject") || "").trim(),
     message: (formData.get("message") || "").trim(),
   };

@@ -8,7 +8,6 @@ APP_DIR="/opt/mailweb"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 DOMAIN="${DOMAIN:-}"
-MAIL_TO_EMAIL="${MAIL_TO_EMAIL:-}"
 SMTP_HOST="${SMTP_HOST:-127.0.0.1}"
 SMTP_PORT="${SMTP_PORT:-25}"
 SMTP_USERNAME="${SMTP_USERNAME:-}"
@@ -90,7 +89,6 @@ write_env_file() {
 APP_HOST=127.0.0.1
 APP_PORT=5000
 LOG_LEVEL=INFO
-MAIL_TO_EMAIL=${MAIL_TO_EMAIL}
 SMTP_HOST=${SMTP_HOST}
 SMTP_PORT=${SMTP_PORT}
 SMTP_USERNAME=${SMTP_USERNAME}
@@ -164,8 +162,10 @@ show_summary() {
   if [[ "${ENABLE_HTTPS}" == "1" ]]; then
     echo "访问地址: https://${DOMAIN}"
   fi
-  echo "老师邮箱: ${MAIL_TO_EMAIL}"
   echo "应用目录: ${APP_DIR}"
+  echo "收件人: 由网页表单中的 to_email 决定"
+  echo
+  echo "安全提醒: 当前版本允许用户自行填写收件人，公网环境建议至少增加验证码、登录或白名单。"
   echo
   echo "可用排查命令:"
   echo "  sudo systemctl status mailweb --no-pager"
@@ -177,7 +177,6 @@ show_summary() {
 main() {
   require_root
   require_var DOMAIN
-  require_var MAIL_TO_EMAIL
 
   install_packages
   ensure_user_and_dir
