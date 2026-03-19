@@ -1,0 +1,20 @@
+[Unit]
+Description=MailWeb Flask Application
+After=network.target
+
+[Service]
+Type=simple
+User=mailweb
+Group=mailweb
+WorkingDirectory=/opt/mailweb
+EnvironmentFile=/opt/mailweb/.env
+ExecStart=/opt/mailweb/.venv/bin/python -m waitress --host=127.0.0.1 --port=5000 app:app
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
