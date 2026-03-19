@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -12,23 +12,23 @@
       <div class="card-header">
         <p class="badge">Mail Form Demo</p>
         <h1>网页邮件发送系统</h1>
-        <p class="subtitle">通过网页表单填写发件人、收件人、主题与正文，由 Ubuntu 服务器通过 Nginx + Flask + SMTP 发出邮件。</p>
+        <p class="subtitle">通过网页表单填写联系邮箱、收件人、主题与正文，由 Ubuntu 服务器经外部 SMTP 中继投递事务性邮件。</p>
       </div>
 
       <div class="target-box">
-        <span class="target-label">使用说明</span>
-        <strong>收件人邮箱由提交者自行填写</strong>
-        <p>如果你要把这个站点暴露到公网，强烈建议额外增加登录、验证码或收件人白名单，避免被滥用为任意发信入口。</p>
+        <span class="target-label">投递说明</span>
+        <strong>系统发件人由服务器配置决定</strong>
+        <p>表单中的联系邮箱只写入邮件正文，不直接作为 SMTP 发件人。推荐使用 587 + AUTH + STARTTLS 或 465 + SSL 的外部 SMTP 中继。</p>
       </div>
 
       <form id="mail-form" class="mail-form" novalidate>
         <div class="form-row">
-          <label for="name">发件人姓名</label>
+          <label for="name">提交人姓名</label>
           <input id="name" name="name" type="text" maxlength="100" placeholder="例如：张三" required>
         </div>
 
         <div class="form-row">
-          <label for="email">发件人邮箱</label>
+          <label for="email">联系邮箱</label>
           <input id="email" name="email" type="email" placeholder="sender@example.com" required>
         </div>
 
@@ -39,12 +39,12 @@
 
         <div class="form-row">
           <label for="subject">邮件主题</label>
-          <input id="subject" name="subject" type="text" maxlength="200" placeholder="请输入邮件主题" required>
+          <input id="subject" name="subject" type="text" maxlength="200" placeholder="请输入清晰直接的事务性主题" required>
         </div>
 
         <div class="form-row">
           <label for="message">邮件正文</label>
-          <textarea id="message" name="message" rows="8" maxlength="5000" placeholder="请输入邮件正文内容。" required></textarea>
+          <textarea id="message" name="message" rows="8" maxlength="5000" placeholder="请输入事务性邮件正文内容。" required></textarea>
         </div>
 
         <button id="submit-btn" type="submit">提交并发送邮件</button>

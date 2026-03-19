@@ -1,4 +1,4 @@
-﻿const form = document.getElementById("mail-form");
+const form = document.getElementById("mail-form");
 const resultBox = document.getElementById("result");
 const submitBtn = document.getElementById("submit-btn");
 
@@ -11,10 +11,10 @@ function showResult(message, type) {
 
 function validateForm(data) {
   if (!data.name) {
-    return "请输入发件人姓名。";
+    return "请输入提交人姓名。";
   }
   if (!data.email || !EMAIL_RE.test(data.email)) {
-    return "请输入正确的发件人邮箱。";
+    return "请输入正确的联系邮箱。";
   }
   if (!data.to_email || !EMAIL_RE.test(data.to_email)) {
     return "请输入正确的收件人邮箱。";
@@ -62,7 +62,7 @@ form.addEventListener("submit", async (event) => {
 
     const payload = await response.json().catch(() => ({
       ok: false,
-      message: "服务器返回了无法解析的响应。",
+      error: "服务器返回了无法解析的响应。",
     }));
 
     if (!response.ok || !payload.ok) {
@@ -70,7 +70,7 @@ form.addEventListener("submit", async (event) => {
         const details = Object.values(payload.errors).join(" ");
         showResult(`提交失败：${details}`, "error");
       } else {
-        showResult(`提交失败：${payload.message || "未知错误"}`, "error");
+        showResult(`提交失败：${payload.error || "未知错误"}`, "error");
       }
       return;
     }

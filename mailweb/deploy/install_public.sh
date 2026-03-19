@@ -8,17 +8,19 @@ APP_DIR="/opt/mailweb"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 DOMAIN="${DOMAIN:-}"
-SMTP_HOST="${SMTP_HOST:-127.0.0.1}"
-SMTP_PORT="${SMTP_PORT:-25}"
+SMTP_HOST="${SMTP_HOST:-smtp.your-provider.com}"
+SMTP_PORT="${SMTP_PORT:-587}"
 SMTP_USERNAME="${SMTP_USERNAME:-}"
 SMTP_PASSWORD="${SMTP_PASSWORD:-}"
-SMTP_USE_TLS="${SMTP_USE_TLS:-false}"
+SMTP_USE_TLS="${SMTP_USE_TLS:-true}"
 SMTP_USE_SSL="${SMTP_USE_SSL:-false}"
-SMTP_TIMEOUT="${SMTP_TIMEOUT:-10}"
+MAIL_FROM="${MAIL_FROM:-}"
+MAIL_FROM_NAME="${MAIL_FROM_NAME:-Mail Web}"
+MAIL_REPLY_TO="${MAIL_REPLY_TO:-}"
+MAIL_TIMEOUT="${MAIL_TIMEOUT:-15}"
 ENABLE_HTTPS="${ENABLE_HTTPS:-0}"
 CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"
-INSTALL_POSTFIX="${INSTALL_POSTFIX:-1}"
-SMTP_FROM_EMAIL="${SMTP_FROM_EMAIL:-}"
+INSTALL_POSTFIX="${INSTALL_POSTFIX:-0}"
 
 log() {
   echo "[${APP_NAME}] $*"
@@ -48,7 +50,7 @@ install_packages() {
   apt-get install -y nginx python3 python3-venv rsync
 
   if [[ "${INSTALL_POSTFIX}" == "1" ]] && ! dpkg -s postfix >/dev/null 2>&1; then
-    log "安装 Postfix（Local only）"
+    log "安装 Postfix（仅在你明确需要本机 MTA 时启用）"
     echo "postfix postfix/mailname string ${DOMAIN}" | debconf-set-selections
     echo "postfix postfix/main_mailer_type string 'Local only'" | debconf-set-selections
     DEBIAN_FRONTEND=noninteractive apt-get install -y postfix
@@ -80,10 +82,6 @@ sync_project() {
 }
 
 write_env_file() {
-  if [[ -z "${SMTP_FROM_EMAIL}" ]]; then
-    SMTP_FROM_EMAIL="noreply@${DOMAIN}"
-  fi
-
   log "写入 ${APP_DIR}/.env"
   cat > "${APP_DIR}/.env" <<EOF
 APP_HOST=127.0.0.1
@@ -95,8 +93,10 @@ SMTP_USERNAME=${SMTP_USERNAME}
 SMTP_PASSWORD=${SMTP_PASSWORD}
 SMTP_USE_TLS=${SMTP_USE_TLS}
 SMTP_USE_SSL=${SMTP_USE_SSL}
-SMTP_TIMEOUT=${SMTP_TIMEOUT}
-SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+MAIL_FROM=${MAIL_FROM}
+MAIL_FROM_NAME=${MAIL_FROM_NAME}
+MAIL_REPLY_TO=${MAIL_REPLY_TO}
+MAIL_TIMEOUT=${MAIL_TIMEOUT}
 EOF
 }
 
@@ -163,9 +163,10 @@ show_summary() {
     echo "访问地址: https://${DOMAIN}"
   fi
   echo "应用目录: ${APP_DIR}"
-  echo "收件人: 由网页表单中的 to_email 决定"
+  echo "SMTP 主机: ${SMTP_HOST}:${SMTP_PORT}"
+  echo "MAIL_FROM: ${MAIL_FROM}"
   echo
-  echo "安全提醒: 当前版本允许用户自行填写收件人，公网环境建议至少增加验证码、登录或白名单。"
+  echo "提醒: 推荐使用外部 SMTP 中继，并让 MAIL_FROM 与 SMTP 账号所属域保持一致。"
   echo
   echo "可用排查命令:"
   echo "  sudo systemctl status mailweb --no-pager"
@@ -177,6 +178,9 @@ show_summary() {
 main() {
   require_root
   require_var DOMAIN
+  require_var SMTP_USERNAME
+  require_var SMTP_PASSWORD
+  require_var MAIL_FROM
 
   install_packages
   ensure_user_and_dir

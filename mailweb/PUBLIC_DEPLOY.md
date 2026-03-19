@@ -1,37 +1,38 @@
-﻿# 公网部署补充说明
+# 公网部署补充说明
 
-本项目现在是通用收件人版本，收件人邮箱由前端表单里的 `to_email` 字段决定，而不是后端固定写死。
+本项目现在优先面向外部 SMTP 中继部署，推荐使用 587 + AUTH + STARTTLS，或 465 + SSL。
+不再默认推荐 127.0.0.1:25 的本机无认证直发。
 
 ## 推荐公网部署流程
 
 1. 准备域名，例如 `submit.example.com`
 2. 将域名的 A 记录指向 Ubuntu 服务器公网 IP
-3. 部署 Flask 应用和 systemd 服务
-4. 安装 Nginx 并启用 `deploy/nginx-mailweb.conf`
-5. 确认 `http://submit.example.com` 能访问
-6. 申请 HTTPS 证书
-7. 切换到 `deploy/nginx-mailweb-https.conf` 或直接使用 `certbot --nginx`
+3. 准备外部 SMTP 中继账号，并确认其支持事务性邮件投递
+4. 部署 Flask 应用和 systemd 服务
+5. 安装 Nginx 并启用 `deploy/nginx-mailweb.conf`
+6. 确认 `http://submit.example.com` 能访问
+7. 申请 HTTPS 证书
+8. 切换到 `deploy/nginx-mailweb-https.conf` 或直接使用 `certbot --nginx`
 
-## 证书申请命令
+## 推荐环境变量
 
-```bash
-sudo apt update
-sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d submit.example.com
+```env
+SMTP_HOST=smtp.your-provider.com
+SMTP_PORT=587
+SMTP_USERNAME=your_account
+SMTP_PASSWORD=your_password_or_app_password
+SMTP_USE_TLS=true
+SMTP_USE_SSL=false
+MAIL_FROM=your_account@your-domain.com
+MAIL_FROM_NAME=Mail Web
+MAIL_REPLY_TO=your_account@your-domain.com
+MAIL_TIMEOUT=15
 ```
 
-如果你更喜欢手动维护证书路径，可以把 `deploy/nginx-mailweb-https.conf` 复制到
-`/etc/nginx/sites-available/mailweb` 后再执行：
+## QQ 邮箱投递建议
 
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-## 公网安全建议
-
-- 当前版本允许用户自行填写 `to_email`
-- 这意味着它天然更接近“任意收件人发信入口”
-- 如果你要公开上线，强烈建议至少增加验证码、登录机制或收件人白名单
-- 保留 Nginx 中的 `limit_req`
-- 把 `SMTP_FROM_EMAIL` 配成你控制的真实发件地址
+- 尽量使用可信外部 SMTP 中继，不要默认依赖本机 Postfix 直发
+- `MAIL_FROM` 尽量与 SMTP 账号所属域一致
+- 发给 QQ 邮箱时，发信域最好已经配置 SPF 或 DKIM
+- `From` 和 `Sender` 应保持一致，避免出现额外伪造的发件人
+- 邮件正文尽量简洁、直接，不要只发图片或只有一个链接
